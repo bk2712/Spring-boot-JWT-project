@@ -6,6 +6,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @EnableAsync
+
+// this is for testing purpose of spring boot jwt project
 public class TestJwtMethodsApplication {
 
 
