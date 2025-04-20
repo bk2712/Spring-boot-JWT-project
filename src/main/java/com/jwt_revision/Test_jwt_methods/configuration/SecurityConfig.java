@@ -29,7 +29,8 @@ public class SecurityConfig {
                                 "/v1/user/login",
                                 "/v1/user/forget-password/verify-email/**",
                                 "/v1/user/verify-otp/**",
-                                "/v1/user/set-new-password/**"
+                                "/v1/user/set-new-password/**",
+                                "/location/update"
                         ).permitAll() // allow unauthenticated access to these
                         .anyRequest().authenticated() // secure everything else
                 )
