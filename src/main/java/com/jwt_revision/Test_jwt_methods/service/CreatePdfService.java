@@ -3,12 +3,22 @@ package com.jwt_revision.Test_jwt_methods.service;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import org.docx4j.Docx4J;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-
+import org.w3c.dom.Text;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.List;
 
 @Service
 public class CreatePdfService {
@@ -43,6 +53,39 @@ public class CreatePdfService {
 
         return new ByteArrayInputStream(out.toByteArray());
 
+    }
+
+
+
+    // this function will replace and find operation on word doc and return the pdf
+
+    public ByteArrayInputStream findAndReplaceOpInDoc(Map<String, String> replacements) throws Docx4JException, IOException, JAXBException {
+        logger.info("Find and replace service is now started off: ");
+
+        // Load the DOCX template
+        InputStream templateStream = new ClassPathResource("templates/RacoonCityReport.docx").getInputStream();
+        WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.load(templateStream);
+
+        // Iterate over all text elements in the document and perform replacements
+        List<Object> texts = wordMLPackage.getMainDocumentPart().getJAXBNodesViaXPath("//w:t", true);
+
+        for (Object obj : texts) {
+            Text text = (Text) ((JAXBElement<?>) obj).getValue(); // Cast the element to Text
+            for (Map.Entry<String, String> entry : replacements.entrySet()) {
+                String placeholder = "${" + entry.getKey() + "}"; // Define the placeholder
+                if (text.getData().contains(placeholder)) {
+                    // Replace the placeholder with the corresponding value
+                    text.setData(text.getData().replace(placeholder, entry.getValue()));
+                }
+            }
+        }
+
+        // Convert the modified DOCX to PDF and store in ByteArrayOutputStream
+        ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
+        Docx4J.toPDF(wordMLPackage, pdfOutputStream);
+
+        // Convert the ByteArrayOutputStream to ByteArrayInputStream and return it
+        return new ByteArrayInputStream(pdfOutputStream.toByteArray());
     }
 
 }
