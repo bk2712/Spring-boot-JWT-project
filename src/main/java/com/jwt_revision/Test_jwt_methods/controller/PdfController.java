@@ -56,6 +56,8 @@ public class PdfController {
         } catch (Docx4JException | IOException | JAXBException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }
