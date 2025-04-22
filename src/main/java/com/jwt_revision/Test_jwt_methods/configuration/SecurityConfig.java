@@ -31,7 +31,8 @@ public class SecurityConfig {
                                 "/v1/user/verify-otp/**",
                                 "/v1/user/set-new-password/**",
                                 "/location/update",
-                                "pdf/create-pdf"
+                                "pdf/create-pdf",
+                                "pdf/find-replace-text"
                         ).permitAll() // allow unauthenticated access to these
                         .anyRequest().authenticated() // secure everything else
                 )
