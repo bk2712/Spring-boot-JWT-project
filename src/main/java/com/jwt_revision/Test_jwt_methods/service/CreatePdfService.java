@@ -6,6 +6,7 @@ import com.lowagie.text.pdf.PdfWriter;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import org.docx4j.Docx4J;
+import org.docx4j.wml.Text;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
@@ -16,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.Text;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -73,7 +73,7 @@ public class CreatePdfService {
 
         for (Object obj : textNodes) {
             Text text = (Text) obj;
-            String original = text.getData();
+            String original = text.getValue();
 
             if (original != null && original.contains("${")) {
                 for (Map.Entry<String, String> entry : replacements.entrySet()) {
@@ -82,7 +82,7 @@ public class CreatePdfService {
                         original = original.replace(placeholder, entry.getValue());
                     }
                 }
-                text.setData(original);
+                text.setValue(original);
             }
         }
 
