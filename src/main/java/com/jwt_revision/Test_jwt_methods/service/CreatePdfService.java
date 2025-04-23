@@ -65,50 +65,16 @@ public class CreatePdfService {
     // this function will replace and find operation on word doc and return the pdf
 
     public ByteArrayInputStream findAndReplaceOpInDoc(Map<String, String> replacements) throws Exception {
-        InputStream templateStream = new ClassPathResource("templates/RacoonCityReport.docx").getInputStream();
+        InputStream templateStream = new ClassPathResource("templates/ResidentEvil4.docx").getInputStream();
         WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.load(templateStream);
         MainDocumentPart documentPart = wordMLPackage.getMainDocumentPart();
 
-        List<Object> textNodes = getAllElements(documentPart, Text.class);
-
-        for (Object obj : textNodes) {
-            Text text = (Text) obj;
-            String original = text.getValue();
-
-            if (original != null && original.contains("${")) {
-                for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                    String placeholder = "${" + entry.getKey() + "}";
-                    if (original.contains(placeholder)) {
-                        original = original.replace(placeholder, entry.getValue());
-                    }
-                }
-                text.setValue(original);
-            }
-        }
+        // This replaces all ${} variables properly, even across split runs
+        documentPart.variableReplace(replacements);
 
         ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
         Docx4J.toPDF(wordMLPackage, pdfOutputStream);
         return new ByteArrayInputStream(pdfOutputStream.toByteArray());
-    }
-
-    // This is the helper method you were missing
-    private List<Object> getAllElements(Object obj, Class<?> toSearch) {
-        List<Object> result = new ArrayList<>();
-
-        if (obj instanceof JAXBElement) {
-            obj = ((JAXBElement<?>) obj).getValue();
-        }
-
-        if (obj.getClass().equals(toSearch)) {
-            result.add(obj);
-        } else if (obj instanceof ContentAccessor) {
-            List<?> children = ((ContentAccessor) obj).getContent();
-            for (Object child : children) {
-                result.addAll(getAllElements(child, toSearch));
-            }
-        }
-
-        return result;
     }
 
 }
