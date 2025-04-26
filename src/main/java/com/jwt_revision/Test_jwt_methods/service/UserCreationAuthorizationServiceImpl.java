@@ -161,7 +161,7 @@ public class UserCreationAuthorizationServiceImpl implements UserCreationAuthori
         // check if expiration time of otp is surpassed
         ForgetPasswordEntity forgetPasswordDets= forgetPasswordRepository.findByOtp(otp);
         if(forgetPasswordDets != null){
-            forgetPasswordDets= forgetPasswordRepository.findByOtpAndEmail(email,otp);
+            forgetPasswordDets= forgetPasswordRepository.findByOtpAndEmail(email,otp); // to check mapping
             if(forgetPasswordDets != null){
                 Date expTime= forgetPasswordDets.getExpirationTime();
                 if(expTime.after(new Date(System.currentTimeMillis()))) {
