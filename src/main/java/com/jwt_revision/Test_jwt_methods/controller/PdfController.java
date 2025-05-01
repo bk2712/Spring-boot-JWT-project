@@ -60,4 +60,31 @@ public class PdfController {
     }
 
 
+
+    @PostMapping("/find-replace-using-apache-poi")
+    public ResponseEntity<byte[]> textReplaceWithApache(@RequestBody Map<String, String> request) {
+        try {
+            // Extract the base64 DOCX content
+            String base64Docx = (String) request.remove("base64Content");
+
+            // The rest of the body contains placeholder-value pairs
+            Map<String, String> replacements = (Map) request;
+
+            // Generate the PDF
+            byte[] pdfBytes = createPdfService.replaceAndGeneratePdf(base64Docx, replacements);
+
+            // Prepare response headers for PDF download
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.attachment().filename("output.pdf").build());
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(("PDF generation failed: " + e.getMessage()).getBytes());
+        }
+    }
+
+
 }

@@ -41,7 +41,8 @@ public class SecurityConfig {
                                 "/location/update",
                                 "pdf/create-pdf",
                                 "pdf/find-replace-text",
-                                "pdf/replace-image"
+                                "pdf/replace-image",
+                                "pdf/find-replace-using-apache-poi"
                         ).permitAll()
                         .requestMatchers("/excel-operation/dump-excel-data").hasRole("ADMIN")
                         .anyRequest().authenticated()

@@ -6,8 +6,10 @@ import com.lowagie.text.Document;
 import com.lowagie.text.pdf.PdfWriter;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
+import org.apache.poi.xwpf.usermodel.*;
 import org.docx4j.Docx4J;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
+import org.docx4j.openpackaging.io.LoadFromZipNG;
 import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
 import org.docx4j.wml.*;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -77,4 +79,54 @@ public class CreatePdfService {
     }
 
 
+    public byte[] replaceAndGeneratePdf(String base64Docx, Map<String, String> replacements) throws Exception {
+        byte[] docxBytes = Base64.getDecoder().decode(base64Docx);
+        ByteArrayInputStream docxInputStream = new ByteArrayInputStream(docxBytes);
+
+        // Step 1: Replace text using Apache POI
+        XWPFDocument document = new XWPFDocument(docxInputStream);
+
+        for (XWPFParagraph paragraph : document.getParagraphs()) {
+            replaceRuns(paragraph.getRuns(), replacements);
+        }
+
+        for (XWPFTable table : document.getTables()) {
+            for (XWPFTableRow row : table.getRows()) {
+                for (XWPFTableCell cell : row.getTableCells()) {
+                    for (XWPFParagraph paragraph : cell.getParagraphs()) {
+                        replaceRuns(paragraph.getRuns(), replacements);
+                    }
+                }
+            }
+        }
+
+        ByteArrayOutputStream modifiedDocxOut = new ByteArrayOutputStream();
+        document.write(modifiedDocxOut);
+        document.close();
+
+        // Step 2: Convert to PDF using docx4j
+        ByteArrayInputStream updatedDocxStream = new ByteArrayInputStream(modifiedDocxOut.toByteArray());
+        WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.load(updatedDocxStream);
+
+        ByteArrayOutputStream pdfOutStream = new ByteArrayOutputStream();
+        Docx4J.toPDF(wordMLPackage, pdfOutStream);
+
+        return pdfOutStream.toByteArray();
+    }
+
+    private void replaceRuns(java.util.List<XWPFRun> runs, Map<String, String> replacements) {
+        for (XWPFRun run : runs) {
+            String text = run.getText(0);
+            if (text != null) {
+                for (Map.Entry<String, String> entry : replacements.entrySet()) {
+                    // Replace placeholders with value (supporting ${placeholder})
+                    String placeholder = "${" + entry.getKey() + "}";
+                    if (text.contains(placeholder)) {
+                        text = text.replace(placeholder, entry.getValue());
+                    }
+                }
+                run.setText(text, 0);
+            }
+        }
+    }
 }
