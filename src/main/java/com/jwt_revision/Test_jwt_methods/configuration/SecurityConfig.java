@@ -1,13 +1,17 @@
 package com.jwt_revision.Test_jwt_methods.configuration;
 
 
+import com.jwt_revision.Test_jwt_methods.filter.JwtAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,11 +22,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Autowired
+    JwtAuthenticationFilter jwtAuthenticationFilter;
+
     // ✅ New: Define security filter chain
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
-                .csrf(csrf -> csrf.disable()) // disable CSRF for APIs
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/v1/user/register",
@@ -32,12 +40,15 @@ public class SecurityConfig {
                                 "/v1/user/set-new-password/**",
                                 "/location/update",
                                 "pdf/create-pdf",
-                                "pdf/find-replace-text"
-                        ).permitAll() // allow unauthenticated access to these
-                        .anyRequest().authenticated() // secure everything else
+                                "pdf/find-replace-text",
+                                "pdf/replace-image"
+                        ).permitAll()
+                        .requestMatchers("/excel-operation/dump-excel-data").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // optional: for JWT stateless APIs
-                .httpBasic(Customizer.withDefaults()); // basic auth for now (replace with JWT later if needed)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // ✅ Add this line
+                .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }

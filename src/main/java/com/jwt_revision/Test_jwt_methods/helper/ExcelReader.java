@@ -2,6 +2,8 @@ package com.jwt_revision.Test_jwt_methods.helper;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.crypto.Data;
@@ -12,7 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+@Component
 public class ExcelReader {
+
 
     public boolean isFileExcel(MultipartFile excelSheet){
 

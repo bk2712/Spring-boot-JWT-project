@@ -37,7 +37,7 @@ public class JwtServiceImpl {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    private Claims extractCompleteClaims(String token){
+    public Claims extractCompleteClaims(String token){
         // this will be used to fetch complete payload
         return Jwts
                 .parser()
