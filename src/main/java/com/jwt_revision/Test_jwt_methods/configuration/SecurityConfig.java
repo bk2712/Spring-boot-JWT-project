@@ -39,10 +39,11 @@ public class SecurityConfig {
                                 "/v1/user/verify-otp/**",
                                 "/v1/user/set-new-password/**",
                                 "/location/update",
-                                "pdf/create-pdf",
-                                "pdf/find-replace-text",
-                                "pdf/replace-image",
-                                "pdf/find-replace-using-apache-poi"
+                                "/pdf/create-pdf",
+                                "/pdf/find-replace-text",
+                                "/pdf/replace-image",
+                                "/pdf/find-replace-using-apache-poi",
+                                "/api-client/call"
                         ).permitAll()
                         .requestMatchers("/excel-operation/dump-excel-data").hasRole("ADMIN")
                         .anyRequest().authenticated()
